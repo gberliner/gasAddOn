@@ -1,8 +1,7 @@
 import { doGet } from "./server/webapp";
 import "./es6";
-//var global=Object.create({})
-//export {global}
 
+//global defined by gas-entry-generator
 global.doGet = doGet;
 
 global.sendmail = (email = "amit@labnol.org") => {

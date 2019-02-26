@@ -16,7 +16,7 @@
 		"isolatedModules": true,
 		// Import non-ES modules as default imports.
 		"esModuleInterop": true
-                //"types": ["google-apps-script"]
+                "types": ["google-apps-script","gas-entry-generator"]
 	},
 	"include": [
 		"src",

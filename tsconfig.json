@@ -15,10 +15,10 @@
 		// Disallow features that require cross-file information for emit.
 		"isolatedModules": true,
 		// Import non-ES modules as default imports.
-		"esModuleInterop": true
-                "types": ["google-apps-script","gas-entry-generator"]
+		"esModuleInterop": true,
+        "types": ["google-apps-script"],
 	},
 	"include": [
-		"src",
+		"src"
 	]
 }

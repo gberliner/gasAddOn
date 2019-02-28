@@ -1,8 +1,8 @@
-interface KeyValueArray {
+declare interface KeyValueArray {
    [idx:string]: string[]
 }
 
-interface PostData {
+declare interface PostData {
    [idx:string]: string|number
    length: number;
    type: string;
@@ -10,7 +10,7 @@ interface PostData {
    name: string;
 }
 
-interface WebappEvent {
+declare interface WebappEvent {
    [idx:string]: any;
    queryString: string;
    parameter: string;

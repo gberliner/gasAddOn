@@ -6,8 +6,8 @@ export const settingsMenu = () => {
 }
 export function onOpen():void {
     SpreadsheetApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
-        .createMenu('sensorbot')
-        .addItem('insert data', 'showDialog')
+        .createMenu('Sensorbot')
+        .addItem('insert data', 'insertData')
         .addToUi();
 }
 

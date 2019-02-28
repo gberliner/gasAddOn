@@ -29,6 +29,7 @@
   "dependencies": {
     "@typescript-eslint/eslint-plugin-tslint": "^1.3.0",
     "@typescript-eslint/typescript-estree": "^1.3.0",
+    "ts-serializable": "^1.1.5",
     "typescript": "^3.3.3"
   },
   "devDependencies": {

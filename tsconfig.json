@@ -16,7 +16,8 @@
 		"isolatedModules": true,
 		// Import non-ES modules as default imports.
 		"esModuleInterop": true,
-        "types": ["google-apps-script"],
+		"types": ["google-apps-script"],
+		"experimentalDecorators": true,
 	},
 	"include": [
 		"src"

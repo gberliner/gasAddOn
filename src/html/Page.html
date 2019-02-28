@@ -32,24 +32,24 @@
             }
         </style>
     </head>
-    <form method="post" action="<?= pubUrl ?>" >
+    <form id="postpubid" method="post" action="http://localhost:51111">
       <div class="inline form-group">
         <label for="pubid">Sensorbot public id</label>
-        <input type="text" id="pubid" style="width: 150px;">
+        <input name="publicId" type="text" id="pubid" style="width: 150px;">
       </div>
       <div class="block" id="button-bar">
         <button class="secondary" id="cancel-button">Cancel</button>
-        <button class="action" id="insert-data" disabled>Insert data</button>
+        <input  type="submit" class="action" id="submitbutton" disabled>Insert data</button>
       </div>
     </form>
     
-
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>
       $( "#pubid" ).click(function() {
-        $( "#insert-data" ).prop("disabled",false);
+        $( "#submitbutton" ).prop("disabled",false);
       });
-      $( "#insert-data" ).submit(function(event) {
+      $( "#postpubid" ).submit(function(event) {
         if ($("#pubid").val() === "") {
           event.preventDefault();
           alert("Please enter a valid sensorbot public id");

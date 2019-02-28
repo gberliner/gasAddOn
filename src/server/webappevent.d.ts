@@ -12,10 +12,10 @@ declare interface PostData {
 
 declare interface WebappEvent {
    [idx:string]: any;
-   queryString: string;
-   parameter: string;
-   parameters: KeyValueArray;
-   contextPath: string;
-   contentLength: number; 
-   postData: PostData;
+   queryString?: string|undefined;
+   parameter?: string|undefined;
+   parameters?: KeyValueArray|undefined;
+   contextPath?: string|undefined;
+   contentLength?: number|undefined; 
+   postData?: PostData|undefined;
 }

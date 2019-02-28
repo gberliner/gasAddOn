@@ -112,8 +112,8 @@ export function insertData():void {
 }
 
 export function doPost(e: WebappEvent) {
-    if (e.postData.contents !== "") {
-        CacheService.getUserCache().put("publicId", e.postData.contents)
+    if (e.parameters !== undefined) {
+        CacheService.getUserCache().put("publicId", e.parameters["publicId"][0])
         insertData();
     }
 }

@@ -1,18 +1,19 @@
 //sheetapp
 /// <reference path = "webappevent.d.ts" />
+import 'reflect-metadata';
 import { jsonProperty, Serializable } from "ts-serializable";
 export const settingsMenu = () => {
     var email = Session.getActiveUser().getEmail();
 }
-export function onOpen():void {
-    SpreadsheetApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
+export function onOpen(): void {
+    SpreadsheetApp.getUi() // Or DocumentApheadersp or SlidesApp or FormApp.
         .createMenu('Sensorbot')
         .addItem('insert data', 'insertData')
         .addToUi();
 }
 
 
-function showDialog():void {
+function showDialog(): void {
     var publicId = CacheService.getUserCache().get("publicId");
     var html = HtmlService.createHtmlOutputFromFile('Page')
         .setWidth(400)
@@ -21,11 +22,11 @@ function showDialog():void {
         .showModalDialog(html, 'Insert sensorbot data');
 }
 
-interface withPubUrl  {
-    pubUrl?: string
+interface WithPubUrl  {
+    pubUrl?: string;
 }
 
-type templateWithProps = withPubUrl & GoogleAppsScript.HTML.HtmlTemplate
+type templateWithProps = WithPubUrl & GoogleAppsScript.HTML.HtmlTemplate
 
 class SensorbotToken extends Serializable {
     @jsonProperty(String)
@@ -40,10 +41,10 @@ class SensorbotToken extends Serializable {
 
 class TimeSeries extends Serializable {
     @jsonProperty(Number)
-    public ts: Number = 0;
+    public ts: number = 0;
     @jsonProperty(String)
     public value: string = "";
-    constructor() {
+    public constructor() {
         super();
     }
 }
@@ -57,16 +58,18 @@ class SensorbotData extends Serializable {
     public message: string = ""
 }
 
-export function insertData():void {
+export function insertData(): void {
     var pubId: string = CacheService.getUserCache().get("pubId")
+    console.log("Read value of pubid=" + pubId + " from user cache for user " + Session.getActiveUser().getUserLoginId());
     var template: templateWithProps = HtmlService.createTemplateFromFile("Page.html");
     template.pubUrl = ScriptApp.getService().getUrl();
     var html = template.evaluate();
     var currentAccessToken: string = CacheService.getUserCache().get("accessToken");
 
-    if (currentAccessToken === "" && pubId !== "") {
+    if (currentAccessToken === undefined || currentAccessToken === "" && !((pubId === "") || (pubId === undefined))) {
         var postBody = {publicId: pubId}
         var jsonText = JSON.stringify(postBody)
+        /* eslint-disable-next-line @typescript-eslint/camelcase */
         var params: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {method: "post", contentType: "application/json", payload: jsonText};
         var resp = UrlFetchApp.fetch("http://sensorbot.org:8080/api/auth/login/public", params);
         const sensorbotToken: SensorbotToken = JSON.parse(resp.getContentText());
@@ -78,16 +81,17 @@ export function insertData():void {
     }
 
     // check whether we are still tokenless...
-    if (currentAccessToken === "" || pubId === "") {
+    if (!currentAccessToken  || !pubId) {
         SpreadsheetApp.getUi().showModelessDialog(html,"Enter sensorbot id")        
         return;
     }
     
     // attempt to retrieve some data
     var urlString = `http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/${pubId}/values/timeseries?keys=plantowerPM25concRaw`
+    /* eslint-disable-next-line @typescript-eslint/camelcase */
     var sensorbotRequest: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
         method: "get",
-        headers: ["X-Authorization: Bearer " + currentAccessToken]
+        headers: {"X-Authorization": "Bearer " + currentAccessToken}
     }
     var sensorbotResponse = UrlFetchApp.fetch(urlString, sensorbotRequest)
     var sensorbotDatum: SensorbotData = JSON.parse(sensorbotResponse.getContentText())
@@ -99,7 +103,7 @@ export function insertData():void {
         var activeSheet = SpreadsheetApp.getActiveSpreadsheet()
         var currentSheet: GoogleAppsScript.Spreadsheet.Sheet|null = null
         if (activeSheet !== null) {
-           currentSheet = activeSheet.appendRow(rowContents)
+            currentSheet = activeSheet.appendRow(rowContents)
         }
         if (currentSheet !== null) {
             return;
@@ -111,9 +115,19 @@ export function insertData():void {
     
 }
 
-export function doPost(e: WebappEvent) {
+export function doPost(e: WebappEvent): void {
     if (e.parameters !== undefined) {
-        CacheService.getUserCache().put("publicId", e.parameters["publicId"][0])
+        var pubid = e.parameters["publicId"][0]
+        CacheService.getUserCache().put("pubId", e.parameters["publicId"][0])
+        console.log("got publicid = " + pubid + " from user " + Session.getActiveUser().getUserLoginId())
         insertData();
+    } else {
+        console.log("empty parameters list sent from POST request")
     }
+}
+
+export function setPubIdPlusInsertData(pubId: string): void {
+    console.log("value of pubid set by user " + Session.getActiveUser().getUserLoginId() + " was " + pubId);
+    CacheService.getUserCache().put("pubId",pubId);
+    insertData();
 }

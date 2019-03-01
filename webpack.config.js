@@ -85,12 +85,13 @@ module.exports = {
             '@babel/typescript',
             {
               plugins: [
-                "@babel/proposal-object-rest-spread",
-                "@babel/plugin-transform-property-literals",
-                "@babel/plugin-transform-member-expression-literals",
-                "@babel/plugin-transform-object-assign",
-                "array-includes",
-                "@babel/plugin-proposal-class-properties"
+                ["@babel/plugin-proposal-decorators", { "legacy": true}],
+                ["@babel/proposal-object-rest-spread"],
+                ["@babel/plugin-transform-property-literals"],
+                ["@babel/plugin-transform-member-expression-literals"],
+                ["@babel/plugin-transform-object-assign"],
+                ["array-includes"],
+                ["@babel/plugin-proposal-class-properties"],
               ]
             }
           ]
@@ -106,12 +107,13 @@ module.exports = {
             '@babel/typescript',
             {
               plugins: [
-                "@babel/plugin-proposal-class-properties",
-                "@babel/proposal-object-rest-spread",
-                "@babel/plugin-transform-property-literals",
-                "@babel/plugin-transform-member-expression-literals",
-                "@babel/plugin-transform-object-assign",
-                "array-includes",
+                ["@babel/plugin-proposal-decorators", { "legacy": true}],
+                ["@babel/plugin-proposal-class-properties"],
+                ["@babel/proposal-object-rest-spread"],
+                ["@babel/plugin-transform-property-literals"],
+                ["@babel/plugin-transform-member-expression-literals"],
+                ["@babel/plugin-transform-object-assign"],
+                ["array-includes"],
               ]
             }
           ] 

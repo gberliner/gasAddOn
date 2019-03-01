@@ -50,9 +50,14 @@
         $( "#submitbutton" ).prop("disabled",false);
       });
       $( "#postpubid" ).submit(function(event) {
-        if ($("#pubid").val() === "") {
-          event.preventDefault();
+        event.preventDefault();
+        var pubId = $("#pubid").val();
+
+        if (pubId === "") {
           alert("Please enter a valid sensorbot public id");
+        } else {
+          google.script.run.setPubIdPlusInsertData(pubId);
+          google.script.host.close();
         }
       });
 

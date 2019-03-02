@@ -67,7 +67,8 @@ class SensorbotData extends Serializable {
 }
 
 export function insertData(): void {
-    var pubId: string = CacheService.getUserCache().get("pubId")
+    var pubId: string = CacheService.getUserCache().get("pubId");
+    var deviceId: string = CacheService.getUserCache().get("deviceId");
     console.log("Read value of pubid=" + pubId + " from user cache for user " + Session.getActiveUser().getUserLoginId());
     var template: templateWithProps = HtmlService.createTemplateFromFile("Page.html");
     template.pubUrl = ScriptApp.getService().getUrl();
@@ -75,7 +76,7 @@ export function insertData(): void {
 
     var currentAccessToken: string = CacheService.getUserCache().get("accessToken");
 
-    if (!!currentAccessToken === false && !!pubId === true) { // have pubid but not token
+    if (!!currentAccessToken === false && !!pubId === true && !!deviceId === true) { // have pubid but not token
         console.info("Pubid read but no access token found for user session, attempting fetch...")
         var postBody = {publicId: pubId}
         var jsonText = JSON.stringify(postBody)
@@ -101,14 +102,14 @@ export function insertData(): void {
     }
 
     // check whether we are still tokenless...
-    if (!!currentAccessToken == false || !!pubId == false) {
+    if (!!currentAccessToken == false || !!pubId == false || !!deviceId == false) {
         SpreadsheetApp.getUi().showModelessDialog(html,"Enter sensorbot id")        
         return;
     }
     
     // attempt to retrieve some data
     console.log("attempting to fetch timeseries from sensorbot")
-    var urlString = `http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/${pubId}/values/timeseries?keys=plantowerPM25concRaw`
+    var urlString = `http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/${deviceId}/values/timeseries?keys=plantowerPM25concRaw`
     var deviceUrlString = "http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/858db870-6457-11e8-a60d-9d9c1f00510b/values/timeseries?keys=plantowerPM25concRaw"
     /* eslint-disable-next-line @typescript-eslint/camelcase */
     var sensorbotRequest: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
@@ -122,14 +123,21 @@ export function insertData(): void {
     }
     var sensorbotDataPoint = JSON.parse(sensorbotResponse.getContentText())
     console.log("sensorbot response payload: " + sensorbotResponse.getContentText())
+    var lastDatapointTimestamp = CacheService.getUserCache().get("lastDatapoint");
     if ("plantowerPM25concRaw" in sensorbotDataPoint && Array.isArray(sensorbotDataPoint.plantowerPM25concRaw) && sensorbotDataPoint.plantowerPM25concRaw.length > 0 &&  "ts" in sensorbotDataPoint.plantowerPM25concRaw[0]  && (!!sensorbotDataPoint.plantowerPM25concRaw[0].ts) === true && "value" in sensorbotDataPoint.plantowerPM25concRaw[0] && (!!sensorbotDataPoint.plantowerPM25concRaw[0].value) == true) {
         // update spreadsheet
-
         var rowContents = [sensorbotDataPoint.plantowerPM25concRaw[0].ts, sensorbotDataPoint.plantowerPM25concRaw[0].value]
         var activeSheet = SpreadsheetApp.getActiveSpreadsheet()
         var currentSheet: GoogleAppsScript.Spreadsheet.Sheet|null = null
+        let noNewData: boolean = !!lastDatapointTimestamp == true && lastDatapointTimestamp === sensorbotDataPoint.plantowerPM25concRaw[0].ts.toString()
+        if (noNewData === true) {
+            return;
+        }
         if (activeSheet !== null) {
             currentSheet = activeSheet.appendRow(rowContents)
+            lastDatapointTimestamp = sensorbotDataPoint.plantowerPM25concRaw[0].ts
+            console.log("lastDatapointTimestamp: " + lastDatapointTimestamp)
+            CacheService.getUserCache().put("lastDatapoint", lastDatapointTimestamp.toString())
         }
         if (currentSheet !== null) {
             return;
@@ -162,5 +170,15 @@ export function doPost(e: WebappEvent): void {
 export function setPubIdPlusInsertData(pubId: string): void {
     console.log("value of pubid set by user " + Session.getActiveUser().getUserLoginId() + " was " + pubId);
     CacheService.getUserCache().put("pubId",pubId);
+    insertData();
+}
+
+export function configureSettingsPlusInsertData(jsonObj: any) {
+    if ("deviceId" in jsonObj) {
+        CacheService.getUserCache().put("deviceId", jsonObj.deviceId);
+    }
+    if ("publicId" in jsonObj) {
+        CacheService.getUserCache().put("pubId", jsonObj.publicId);
+    }
     insertData();
 }

@@ -33,34 +33,48 @@
         </style>
     </head>
   <body>
-    <form id="postpubid" method="post" action="<?= pubUrl ?>">
       <div class="inline form-group">
         <label for="pubid">Sensorbot public id</label>
         <input name="publicId" type="text" id="pubid" style="width: 150px;">
+        <label for="deviceid">Device id</label>
+        <input name="deviceId" type="text" id="deviceid" style="width: 150px;">
       </div>
       <div class="block" id="button-bar">
         <button class="secondary" id="cancelbutton" onclick="google.script.host.close()">Cancel</button>
-        <input  type="submit" class="action" id="submitbutton" value="Insert data" disabled>
+        <button class="action" id="submitbutton" disabled>Insert data</button>
       </div>
-    </form>
   </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>
       $( "#pubid" ).click(function() {
-        $( "#submitbutton" ).prop("disabled",false);
-      });
-      $( "#postpubid" ).submit(function(event) {
-        event.preventDefault();
         var pubId = $("#pubid").val();
-
-        if (pubId === "") {
+        var deviceId = $("#deviceid").val();        
+        if (!!pubid && !!deviceId) {
+          $( "#submitbutton" ).prop("disabled",false);
+        }
+      });
+      $( "#deviceid" ).click(function() {
+        var pubId = $("#pubid").val();
+        var deviceId = $("#deviceid").val();        
+        if (!!pubid && !!deviceId) {
+          $( "#submitbutton" ).prop("disabled",false);
+        }
+      });
+      
+      $( "#submitbutton" ).click(function(event) {
+        var pubId = $("#pubid").val();
+        var deviceId = $("#deviceid").val();
+        if (!!pubId === false || !!deviceId === false) {
           alert("Please enter a valid sensorbot public id");
         } else {
-          google.script.run.setPubIdPlusInsertData(pubId);
+          //google.script.run.setPubIdPlusInsertData(pubId);
+          google.script.run.configureSettingsPlusInsertData({publicId: pubId, deviceId: deviceId});
           google.script.host.close();
         }
       });
-
+      $( "#cancelbutton" ).click(function() {
+          google.script.host.close();
+      });
     </script>
 
 </html>

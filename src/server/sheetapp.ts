@@ -44,14 +44,11 @@ class TimeSeries extends Serializable {
     public ts: number = 0;
     @jsonProperty(String)
     public value: string = "";
-    public constructor() {
-        super();
-    }
 }
 
 class SensorbotData extends Serializable {
     @jsonProperty(TimeSeries)
-    public plantowerPM25concRaw: TimeSeries|null = null;
+    public plantowerPM25concRaw: TimeSeries = new TimeSeries;
     @jsonProperty(Number)
     public status: number = 0;
     @jsonProperty(String)
@@ -64,39 +61,55 @@ export function insertData(): void {
     var template: templateWithProps = HtmlService.createTemplateFromFile("Page.html");
     template.pubUrl = ScriptApp.getService().getUrl();
     var html = template.evaluate();
+
     var currentAccessToken: string = CacheService.getUserCache().get("accessToken");
 
-    if (currentAccessToken === undefined || currentAccessToken === "" && !((pubId === "") || (pubId === undefined))) {
+    if (!!currentAccessToken === false && !!pubId === true) { // have pubid but not token
+        console.info("Pubid read but no access token found for user session, attempting fetch...")
         var postBody = {publicId: pubId}
         var jsonText = JSON.stringify(postBody)
         /* eslint-disable-next-line @typescript-eslint/camelcase */
         var params: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {method: "post", contentType: "application/json", payload: jsonText};
         var resp = UrlFetchApp.fetch("http://sensorbot.org:8080/api/auth/login/public", params);
+        console.info("response code from authz server: " + resp.getResponseCode().toString());
+        
         const sensorbotToken: SensorbotToken = JSON.parse(resp.getContentText());
         
-        if (sensorbotToken.token !== "") {
+        if (!!sensorbotToken.token === true) {
             currentAccessToken =  sensorbotToken.token;
             CacheService.getUserCache().put("accessToken", currentAccessToken)
+        } else {
+            console.warn("no access token returned by authz server")
+        }
+        if (!!sensorbotToken.message) {
+            if (!!sensorbotToken.status) {
+                console.warn("status returned by authz server: " + sensorbotToken.status)
+            }
+            console.warn("message from authz server: " + sensorbotToken.message);
         }
     }
 
     // check whether we are still tokenless...
-    if (!currentAccessToken  || !pubId) {
+    if (!!currentAccessToken == false || !!pubId == false) {
         SpreadsheetApp.getUi().showModelessDialog(html,"Enter sensorbot id")        
         return;
     }
     
     // attempt to retrieve some data
+    console.log("attempting to fetch timeseries from sensorbot")
     var urlString = `http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/${pubId}/values/timeseries?keys=plantowerPM25concRaw`
+    var deviceUrlString = "http://www.sensorbot.org:8080/api/plugins/telemetry/DEVICE/858db870-6457-11e8-a60d-9d9c1f00510b/values/timeseries?keys=plantowerPM25concRaw"
     /* eslint-disable-next-line @typescript-eslint/camelcase */
     var sensorbotRequest: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
         method: "get",
         headers: {"X-Authorization": "Bearer " + currentAccessToken}
     }
-    var sensorbotResponse = UrlFetchApp.fetch(urlString, sensorbotRequest)
+    var sensorbotResponse = UrlFetchApp.fetch(deviceUrlString, sensorbotRequest)
     var sensorbotDatum: SensorbotData = JSON.parse(sensorbotResponse.getContentText())
-    
-    if (sensorbotDatum.message === "" && sensorbotDatum.plantowerPM25concRaw !== null) {
+    if (!!sensorbotResponse.getResponseCode() === true) {
+        console.log("sensorbot response status: " + sensorbotResponse.getResponseCode())
+    }
+    if (!!sensorbotDatum.plantowerPM25concRaw.ts === true && !!sensorbotDatum.plantowerPM25concRaw.value == true) {
         // update spreadsheet
 
         var rowContents = [sensorbotDatum.plantowerPM25concRaw.ts, sensorbotDatum.plantowerPM25concRaw.value]
@@ -108,8 +121,15 @@ export function insertData(): void {
         if (currentSheet !== null) {
             return;
         }
+    } else {
+        console.error("Failed to read valid data from sensorbot")
     }
-
+    if (!!sensorbotDatum.message === true) {
+        if (!!sensorbotDatum.status == true) {
+            console.warn("status returned by sensorbot: " + sensorbotDatum.status);
+        }
+        console.warn("message from sensorbot: " + sensorbotDatum.message);
+    }
     SpreadsheetApp.getUi().showModelessDialog(html,"Enter sensorbot id")        
     return;
     

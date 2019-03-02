@@ -44,11 +44,22 @@ class TimeSeries extends Serializable {
     public ts: number = 0;
     @jsonProperty(String)
     public value: string = "";
+    public constructor(jsonObj: any) {
+        super();
+        if ('ts' in jsonObj && 'value' in jsonObj) {
+            this.ts = jsonObj.ts;
+            this.value = jsonObj.value;
+        } else {
+            this.ts = 0;
+            this.value = "";
+        }
+
+    }
 }
 
 class SensorbotData extends Serializable {
     @jsonProperty(TimeSeries)
-    public plantowerPM25concRaw: TimeSeries = new TimeSeries;
+    public plantowerPM25concRaw: TimeSeries[] = [new TimeSeries(this.plantowerPM25concRaw)];
     @jsonProperty(Number)
     public status: number = 0;
     @jsonProperty(String)
@@ -109,10 +120,12 @@ export function insertData(): void {
     if (!!sensorbotResponse.getResponseCode() === true) {
         console.log("sensorbot response status: " + sensorbotResponse.getResponseCode())
     }
-    if (!!sensorbotDatum.plantowerPM25concRaw.ts === true && !!sensorbotDatum.plantowerPM25concRaw.value == true) {
+    var sensorbotDataPoint = JSON.parse(sensorbotResponse.getContentText())
+    console.log("sensorbot response payload: " + sensorbotResponse.getContentText())
+    if ("plantowerPM25concRaw" in sensorbotDataPoint && Array.isArray(sensorbotDataPoint.plantowerPM25concRaw) && sensorbotDataPoint.plantowerPM25concRaw.length > 0 &&  "ts" in sensorbotDataPoint.plantowerPM25concRaw[0]  && (!!sensorbotDataPoint.plantowerPM25concRaw[0].ts) === true && "value" in sensorbotDataPoint.plantowerPM25concRaw[0] && (!!sensorbotDataPoint.plantowerPM25concRaw[0].value) == true) {
         // update spreadsheet
 
-        var rowContents = [sensorbotDatum.plantowerPM25concRaw.ts, sensorbotDatum.plantowerPM25concRaw.value]
+        var rowContents = [sensorbotDataPoint.plantowerPM25concRaw[0].ts, sensorbotDataPoint.plantowerPM25concRaw[0].value]
         var activeSheet = SpreadsheetApp.getActiveSpreadsheet()
         var currentSheet: GoogleAppsScript.Spreadsheet.Sheet|null = null
         if (activeSheet !== null) {

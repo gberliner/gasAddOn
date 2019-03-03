@@ -60,7 +60,13 @@
           $( "#submitbutton" ).prop("disabled",false);
         }
       });
-      
+      $( "#deviceid" ).on("keypress",function() {
+        var pubId = $("#pubid").val();
+        var deviceId = $("#deviceid").val();
+        if (!!pubId && !!deviceId) {
+          $("#submitbutton").prop("disabled", false);
+        }
+      });
       $( "#submitbutton" ).click(function(event) {
         var pubId = $("#pubid").val();
         var deviceId = $("#deviceid").val();

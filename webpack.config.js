@@ -130,9 +130,18 @@ module.exports = {
         to: path.resolve(__dirname, destination)
       },
       {
+        from: './icons/*.png',
+        to: path.resolve(__dirname, destination)
+      },
+      {
+        from: './manifest.json',
+        to: path.resolve(__dirname, destination)
+      },
+      {
         from: './appsscript.json',
         to: path.resolve(__dirname, destination)
-      }
+      },
+      
     ]),
 //        printWidth: 80,               // Specify the length of line that the printer will wrap on.
 //        tabWidth: 2,                  // Specify the number of spaces per indentation-level.

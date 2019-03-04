@@ -69,7 +69,7 @@ class SensorbotData extends Serializable {
 export function insertData(): void {
     var pubId: string = CacheService.getUserCache().get("pubId");
     var deviceId: string = CacheService.getUserCache().get("deviceId");
-    console.log("Read value of pubid=" + pubId + " from user cache for user " + Session.getActiveUser().getUserLoginId());
+    console.log("Read value of pubid=" + pubId + " from user cache for user " + Session.getTemporaryActiveUserKey());
     var template: templateWithProps = HtmlService.createTemplateFromFile("Page.html");
     template.pubUrl = ScriptApp.getService().getUrl();
     var html = template.evaluate();
@@ -160,7 +160,7 @@ export function doPost(e: WebappEvent): void {
     if (e.parameters !== undefined) {
         var pubid = e.parameters["publicId"][0]
         CacheService.getUserCache().put("pubId", e.parameters["publicId"][0])
-        console.log("got publicid = " + pubid + " from user " + Session.getActiveUser().getUserLoginId())
+        console.log("got publicid = " + pubid + " from user " + Session.getTemporaryActiveUserKey());
         insertData();
     } else {
         console.log("empty parameters list sent from POST request")
@@ -168,7 +168,7 @@ export function doPost(e: WebappEvent): void {
 }
 
 export function setPubIdPlusInsertData(pubId: string): void {
-    console.log("value of pubid set by user " + Session.getActiveUser().getUserLoginId() + " was " + pubId);
+    console.log("value of pubid set by user " + Session.getTemporaryActiveUserKey() + " was " + pubId);
     CacheService.getUserCache().put("pubId",pubId);
     insertData();
 }

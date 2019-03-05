@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Basic Sensorbot Add-on",
+  "short_name": "sensorbot-addon",
+  "version": "7",
+  "description": "fetch sensorbot data and append it a row at a time to Google Sheets",
+  "icons": {
+    "128": "128x128.png",
+    "16": "16x16.png"
+  },
+  "container": ["DOMAIN_INSTALLABLE"],
+  "api_console_project_id": "207041304996",
+  "app" : {
+    "background": {
+      "persistent": false
+    }
+  }
+}

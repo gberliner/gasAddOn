@@ -134,6 +134,10 @@ module.exports = {
         to: path.resolve(__dirname, destination)
       },
       {
+        from: './manifest.json',
+        to: path.resolve(__dirname, destination)
+      },
+      {
         from: './appsscript.json',
         to: path.resolve(__dirname, destination)
       },
